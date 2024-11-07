@@ -101,10 +101,7 @@ TODO: Figure the above out. I only have PVOC-EX test files.
 #define TOP_BACK_LEFT         0x4000
 #define TOP_BACK_RIGHT        0x8000
 
-#define WAV_BEXT_MIN_CHUNK_SIZE		602
-
-/* Type for FourCC codes. UNUSED? */
-typedef uint32_t FOURCC;
+#define BEXT_MIN_CHUNK_SIZE		602
 
 /* Internal stream endianness, RIFX == BIG_ENDIAN */
 typedef enum {
@@ -359,16 +356,24 @@ void wsread(FILE *fp) {
 
       fseek(fp, 180, SEEK_CUR); /* Skip RESERVED. */
 
-      /* I have no idea why this isn't working... */
-      if (ck_size > WAV_BEXT_MIN_CHUNK_SIZE) {
+      if (ck_size > BEXT_MIN_CHUNK_SIZE) {
         /* Coding history exists. */
-        size_t ch_size = ck_size - WAV_BEXT_MIN_CHUNK_SIZE;
+        size_t ch_size = ck_size - BEXT_MIN_CHUNK_SIZE;
         char coding_history[ch_size];
         wsr_fread(&coding_history, 1, ch_size, fp, endianness);
-        printf("Coding history [NOT WORKING]: %s\n", coding_history);
 
+        printf("Coding history: ");
+        for (size_t i = 0; i < ch_size; i++) {
+          /* Ignore control characters and NULL bytes. */
+          if (coding_history[i] == '\r' || coding_history[i] == '\n' ||
+              coding_history[i] == '\0') {
+            continue;
+          }
+          printf("%c", coding_history[i]);
+        }
+        printf("\n");
         printf(
-            " Coding history field info:\n  A=(Coding algorithm)\n  "
+            "\n Coding history field info:\n  A=(Coding algorithm)\n  "
             "F=(Sampling frequency in Hz)\n  B=(bitrate for MPEG 2 in kbit/s "
             "per channel)\n  W=(Word length for MPEG coding in bits)\n  "
             "M=(mode)\n  T=(text, could be ID-No, codec-type, A/D type..)\n");
@@ -586,11 +591,60 @@ void wsread(FILE *fp) {
       break;
     }
 
-    case INST_CODE:
-      break;
+    case INST_CODE: {
+      char unshifted_note;
+      wsr_fread(&unshifted_note, 1, 1, fp, endianness);
+      printf("Unshifted note: %d\n", unshifted_note);
 
-    case LEVL_CODE:
+      char fine_tuning;
+      wsr_fread(&fine_tuning, 1, 1, fp, endianness);
+      printf("Fine-tuning: %d\n", fine_tuning);
+
+      char gain;
+      wsr_fread(&gain, 1, 1, fp, endianness);
+      printf("Gain: %d\n", gain);
+
+      char low_note;
+      wsr_fread(&low_note, 1, 1, fp, endianness);
+      printf("Low note: %d\n", low_note);
+
+      char high_note;
+      wsr_fread(&high_note, 1, 1, fp, endianness);
+      printf("High note: %d\n", high_note);
+
+      char low_velocity;
+      wsr_fread(&low_velocity, 1, 1, fp, endianness);
+      printf("Low velocity: %d\n", low_velocity);
+
+      char high_velocity;
+      wsr_fread(&high_velocity, 1, 1, fp, endianness);
+      printf("High velocity: %d\n", high_velocity);
+
       break;
+    }
+
+    case LEVL_CODE: {
+      /*)uint32_t version;
+
+      uint32_t format;
+
+      uint32_t points_per_value;
+
+      uint32_t block_size;
+
+      uint32_t channel_count;
+
+      uint32_t frame_count;
+
+      uint32_t position;
+
+      uint32_t offset; */
+
+      /* Timestamp is always 28 bytes, reserved 60. */
+
+      /* Everything after reserved is peak envelope data. */
+      break;
+    }
 
     case MD5_CODE:
       break;
