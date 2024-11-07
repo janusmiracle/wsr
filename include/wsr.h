@@ -1,6 +1,6 @@
 /* clang-format off */
-#ifndef WAVE_READ_H
-#define WAVE_READ_H
+#ifndef WAVE_STRUCTURE_READER_H
+#define WAVE_STRUCTURE_READER_H
 
 
 #include <stdint.h>
@@ -664,4 +664,4 @@ void wsread(FILE *fp) {
   }
 }
 
-#endif // WAVE_READ_H
+#endif // WAVE_STRUCTURE_READER_H
