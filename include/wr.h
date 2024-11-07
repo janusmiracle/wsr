@@ -364,16 +364,16 @@ void wsread(FILE *fp) {
 
         printf("Coding history: ");
         for (size_t i = 0; i < ch_size; i++) {
-          /* Ignore control characters and NULL bytes. */
-          if (coding_history[i] == '\r' || coding_history[i] == '\n' ||
-              coding_history[i] == '\0') {
+          /* printf treats NULL bytes as a sign to terminate printing.
+             Thus, they must be ignored to properly output coding history. */
+          if (coding_history[i] == '\0') {
             continue;
           }
           printf("%c", coding_history[i]);
         }
         printf("\n");
         printf(
-            "\n Coding history field info:\n  A=(Coding algorithm)\n  "
+            " Coding history field info:\n  A=(Coding algorithm)\n  "
             "F=(Sampling frequency in Hz)\n  B=(bitrate for MPEG 2 in kbit/s "
             "per channel)\n  W=(Word length for MPEG coding in bits)\n  "
             "M=(mode)\n  T=(text, could be ID-No, codec-type, A/D type..)\n");
