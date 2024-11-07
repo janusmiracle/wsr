@@ -364,8 +364,7 @@ void wsread(FILE *fp) {
 
         printf("Coding history: ");
         for (size_t i = 0; i < ch_size; i++) {
-          /* printf treats NULL bytes as a sign to terminate printing.
-             Thus, they must be ignored to properly output coding history. */
+          /* NULL bytes MUST be ignored to properly print coding history. */
           if (coding_history[i] == '\0') {
             continue;
           }
