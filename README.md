@@ -2,9 +2,28 @@
 
 A command-line tool to read WAVE files.
 
-Supports most documented chunks, as well as RIFX and RF64.
+## Installation
 
-Not supported: Sony Wave64, Dolby ADM, XML chunks. However, any unsupported chunk will still be outputted as a Generic with their identifier and size.
+Clone the repository and run `install.sh` to install the command globally.
+
+If that doesn't work, run `$ chmod +x install.sh` then try again.
+
+```
+$ git clone https://github.com/janusmiracle/wsr.git 
+$ ./install.sh
+```
+
+## Usage 
+
+Call the command with the path leading to the WAVE file.
+
+```
+$ wsr ~/Downloads/testfile.wav
+```
+
+Supports most documented chunks, as well as RIFX.
+
+Any unsupported chunk will still be outputted as a Generic with their identifier and size.
 
 For example:
 ```
