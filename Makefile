@@ -1,6 +1,5 @@
 CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -Wformat-security -Werror
-
 SRC = src/main.c
 TARGET = wsr
 

@@ -102,6 +102,7 @@ TODO: Figure the above out. I only have PVOC-EX test files.
 #define TOP_BACK_RIGHT        0x8000
 
 #define BEXT_MIN_CHUNK_SIZE		602
+#define LEVL_MIN_CHUNK_SIZE   120
 
 /* Internal stream endianness, RIFX == BIG_ENDIAN */
 typedef enum {
@@ -285,9 +286,6 @@ void wsread(FILE *fp) {
 
       break;
     }
-    case ADTL_CODE:
-      break;
-
     case BEXT_CODE: {
       char description[257];
       wsr_fread(&description, 1, 256, fp, endianness);
@@ -380,17 +378,17 @@ void wsread(FILE *fp) {
 
       break;
     }
-    case CART_CODE:
-      break;
 
-    case CHNA_CODE:
-      break;
+    case DISP_CODE: {
+      uint32_t cftype;
+      wsr_fread(&cftype, sizeof(cftype), 1, fp, endianness);
 
-    case CUE_CODE:
-      break;
+      char cfdata[ck_size - 4];
+      wsr_fread(&cfdata, 1, ck_size - 4, fp, endianness);
 
-    case DISP_CODE:
+      printf("CF type: %d\nCF data: %s\n", cftype, cfdata);
       break;
+    }
 
     case FACT_CODE: {
       uint32_t samples;
@@ -623,35 +621,59 @@ void wsread(FILE *fp) {
     }
 
     case LEVL_CODE: {
-      /*)uint32_t version;
+      uint32_t version;
+      wsr_fread(&version, sizeof(version), 1, fp, endianness);
 
       uint32_t format;
+      wsr_fread(&format, sizeof(format), 1, fp, endianness);
 
       uint32_t points_per_value;
+      wsr_fread(&points_per_value, sizeof(points_per_value), 1, fp, endianness);
 
       uint32_t block_size;
+      wsr_fread(&block_size, sizeof(block_size), 1, fp, endianness);
 
       uint32_t channel_count;
+      wsr_fread(&channel_count, sizeof(channel_count), 1, fp, endianness);
 
       uint32_t frame_count;
+      wsr_fread(&frame_count, sizeof(frame_count), 1, fp, endianness);
 
       uint32_t position;
+      wsr_fread(&position, sizeof(version), 1, fp, endianness);
 
-      uint32_t offset; */
+      uint32_t offset;
+      wsr_fread(&offset, sizeof(offset), 1, fp, endianness);
 
       /* Timestamp is always 28 bytes, reserved 60. */
+      char timestamp[28];
+      wsr_fread(&timestamp, 1, 28, fp, endianness);
 
-      /* Everything after reserved is peak envelope data. */
+      char reserved[60];
+      wsr_fread(&reserved, 1, 60, fp, endianness);
+
+      printf("Version: %d\nFormat: %d\nPoints per value: %d\nBlock size: "
+             "%d\nChannel count: %d\nFrame count: %d\nPosition: %d\nOffset: "
+             "%d\nTimestamp: %s\nReserved: %s\n",
+             version, format, points_per_value, block_size, channel_count,
+             frame_count, position, offset, timestamp, reserved);
+
+      /* Everything after reserved is peak envelope data, ignore. */
       break;
     }
 
-    case MD5_CODE:
+    case MD5_CODE: {
+      uint64_t buffront;
+      wsr_fread(&buffront, sizeof(buffront), 1, fp, endianness);
+      uint64_t bufback;
+      wsr_fread(&bufback, sizeof(bufback), 1, fp, endianness);
+      /* Cannot tell if this is correct. */
+      printf("Checksum: %llu%llu\n", buffront, bufback);
       break;
-
-    case SMPL_CODE:
-      break;
+    }
 
     case STRC_CODE:
+      /* Almost entirely undocumented, not worth implementing. */
       break;
     default:
       break; /* Generic or unsupported chunk. */
